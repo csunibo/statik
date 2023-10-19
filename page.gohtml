@@ -9,6 +9,11 @@
     <h1>
       Index of /{{ range $i,$p := .Parts }}<a href="{{ $p.URL }}">{{ $p.Name }}</a>/{{ end }}
     </h1>
+    <blockquote>
+      Questa visualizzazione statica è deprecata. Puoi consultare questi
+      contenuti su
+      <a href='https://risorse.cs.students.unibo.it/{{ .Root.URL.Path }}'>risorse.cs.students.unibo.it{{ .Root.URL.Path }}</a>.
+    </blockquote>
     <hr>
     <div class="g">
       {{ range $i,$d := .Root.Directories }}
