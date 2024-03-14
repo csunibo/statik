@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -250,8 +251,22 @@ func newFile(entry os.DirEntry, dir string) (fz FuzzyFile, f File, err error) {
 	return fz, File{
 		FuzzyFile: fz,
 		Size:      size,
-		ModTime:   info.ModTime(),
+		ModTime:   getCommitDateTime(info, name),
 	}, nil
+}
+
+func getCommitDateTime(info fs.FileInfo, name string) time.Time {
+	if info.Sys() == nil {
+		return info.ModTime()
+	}
+
+	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git log --diff-filter=A --follow --format=%%aI -1 -- %s`, name))
+    out, _ := cmd.Output()
+
+	s := string(out)
+	fmt.Println(name)
+  	t, _ := time.Parse(time.RFC3339, s[:len(s)-1])
+	return t
 }
 
 type Named interface {
