@@ -251,21 +251,27 @@ func newFile(entry os.DirEntry, dir string) (fz FuzzyFile, f File, err error) {
 	return fz, File{
 		FuzzyFile: fz,
 		Size:      size,
-		ModTime:   getCommitDateTime(info, name),
+		ModTime:   getCommitDateTime(abs, info, name),
 	}, nil
 }
 
-func getCommitDateTime(info fs.FileInfo, name string) time.Time {
+func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 	if info.Sys() == nil {
 		return info.ModTime()
 	}
 
-	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git log --diff-filter=A --follow --format=%%aI -1 -- %s`, name))
-    out, _ := cmd.Output()
+	// If the file is a link we need to search it with the extension
+	if strings.Index(name, ".") == -1 {
+		name = name + linkSuffix
+	}
+
+	path = strings.Split(path, name)[0]
+
+	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=A --follow --format=%%aI -1 -- %s`, path, name))
+	out, _ := cmd.Output()
 
 	s := string(out)
-	fmt.Println(name)
-  	t, _ := time.Parse(time.RFC3339, s[:len(s)-1])
+	t, _ := time.Parse(time.RFC3339, s[:len(s)-1])
 	return t
 }
 
