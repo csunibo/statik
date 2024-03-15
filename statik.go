@@ -267,10 +267,11 @@ func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 
 	path = strings.Split(path, name)[0]
 
-	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=A --follow --format=%%aI -1 -- %s`, path, name))
+	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=AM --follow --format=%%aI -1 -- %s`, path, name))
 	out, _ := cmd.Output()
 
 	s := string(out)
+
 	t, _ := time.Parse(time.RFC3339, s[:len(s)-1])
 	return t
 }
