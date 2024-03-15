@@ -6,6 +6,7 @@ on:
       - '**'
     branches:
       - 'main'
+      - 'fix/file-date'
 
 jobs:
   docker:
