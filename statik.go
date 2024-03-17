@@ -259,7 +259,10 @@ func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 	if info.Sys() == nil {
 		return info.ModTime()
 	}
-	fmt.Println("Here")
+
+	// In order to get the real date of a file we can't check for the compiled
+	// version. We need to check if there is another file in the same directory
+	// with the same name but differente extension and get his date.
 
 	// If the file is a link we need to search it with the extension
 	if strings.Index(name, ".") == -1 {
@@ -267,6 +270,11 @@ func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 	}
 
 	path = strings.Split(path, name)[0]
+
+	original := findOriginalFileName(path, name)
+	if original != "" {
+		name = original
+	}
 
 	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=AM --follow --format=%%aI -1 -- %s`, path, name))
 	var stdout bytes.Buffer
@@ -284,13 +292,34 @@ func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 	var t time.Time
 	if len(s) > 0 {
 		t, _ = time.Parse(time.RFC3339, s[:len(s)-1])
-		fmt.Println("Time is correct: ", t.String())
 	} else {
-		fmt.Printf("name: %s\npath: %s\ntime: %s", name, path, s)
 		t = info.ModTime()
 	}
 
 	return t
+}
+
+func findOriginalFileName(path string, name string) string {
+	// File name without extension
+	s_name := strings.Split(name, ".")[0]
+
+	l, e := os.ReadDir(path)
+	if e != nil {
+		return ""
+	}
+
+	for _, i := range l {
+		if i.IsDir() {
+			continue
+		}
+
+		// If the name witout extension match and is different from the compiled
+		// file we found the original
+		if strings.Split(i.Name(), ".")[0] == s_name && i.Name() != name {
+			return i.Name()
+		}
+	}
+	return ""
 }
 
 type Named interface {
