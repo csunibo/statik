@@ -271,31 +271,39 @@ func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 
 	path = strings.Split(path, name)[0]
 
-	original := findOriginalFileName(path, name)
-	if original != "" {
-		name = original
+	// If there are two files with the same name but different extension we take
+	// the oldest date between the two
+
+	var names []string
+	names = append(names, name)
+	names = append(names, findOriginalFileName(path, name))
+
+	var t time.Time = time.Now()
+	for _, n := range names {
+		if n == "" {
+			continue
+		}
+
+		cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=AM --follow --format=%%aI -1 -- %s`, path, n))
+		var stdout bytes.Buffer
+		var stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+		}
+
+		s := string(stdout.String())
+
+		if len(s) > 0 {
+			tmp, _ := time.Parse(time.RFC3339, s[:len(s)-1])
+			if tmp.Compare(t) == -1 {
+				t = tmp
+			}
+		}
 	}
-
-	cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=AM --follow --format=%%aI -1 -- %s`, path, name))
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-	}
-
-	s := string(stdout.String())
-
-	var t time.Time
-	if len(s) > 0 {
-		t, _ = time.Parse(time.RFC3339, s[:len(s)-1])
-	} else {
-		t = info.ModTime()
-	}
-
 	return t
 }
 
