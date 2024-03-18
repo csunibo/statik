@@ -28,18 +28,17 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push tag
+      - name: Build and push latest on main
+        if: github.ref_name == 'main'
         uses: docker/build-push-action@v3
-        if: startsWith(github.event.ref, 'refs/tags/v')
         with:
           context: .
           push: true
-          tags: "ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
+          tags: ghcr.io/csunibo/${{ github.repository }}:latest
 
-      - name: Build and push latest tag
+      - name: Build and push with ref name
         uses: docker/build-push-action@v3
-        if: startsWith(github.event.ref, 'refs/tags/v') != true
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/csunibo/${{ github.repository }}:${{ github.ref_name }}
