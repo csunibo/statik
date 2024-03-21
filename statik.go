@@ -419,6 +419,19 @@ func walk(base string) (dir Directory, fz []FuzzyFile, err error) {
 		sortByName(dir.Files)
 		sortByName(dir.Directories)
 	}
+
+	// Set Mod time on dir based on the latest modified file
+	t := time.Time{}
+	for _, f := range dir.Files {
+		if t.Compare(f.ModTime) == -1 {
+			t = f.ModTime
+		}
+	}
+
+	if !t.IsZero() {
+		dir.ModTime = t
+	}
+
 	return
 }
 
