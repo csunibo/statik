@@ -41,7 +41,7 @@ jobs:
       # to avoid it
 
       - name: Check if 'dependabot' is in branch name
-        run: echo "IS_NOT_DEPENDABOT=$([[ $(echo ${{ github.branch_name }}) == *dependabot* ]] && echo "false" || echo "true")" >> $GITHUB_ENV
+        run: echo "IS_NOT_DEPENDABOT=$([[ $(echo ${{ env.branch_name }}) == *dependabot* ]] && echo "false" || echo "true")" >> $GITHUB_ENV
 
       - name: Build and push with ref name
         uses: docker/build-push-action@v3
