@@ -37,9 +37,15 @@ jobs:
           a=${{ github.ref_name }}
           echo "branch_name=${a//\//-}" >> $GITHUB_ENV
 
+      # PR opened by dependabot can't push. I didn't find other way
+      # to avoid it
+
+      - name: Check if 'dependabot' is in branch name
+        run: echo "IS_NOT_DEPENDABOT=$([[ $(echo "procione") == *omar* ]] && echo "false" || echo "true")" >> $GITHUB_ENV
+
       - name: Build and push with ref name
         uses: docker/build-push-action@v3
-        with:
+        with: 
           context: .
-          push: true
+          push: ${{ env.IS_NOT_DEPENDABOT }}
           tags: ghcr.io/${{ github.repository }}:${{ env.branch_name }}
