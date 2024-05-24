@@ -1,8 +1,8 @@
 /* NOTE: this stylesheet is compressed and directly embedded into the go code */
 :root {
-  --b: #fbf1c7;
-  --f: #282828;
-  --d: #af3a03;
+  --b: #F1FAEE;
+  --f: #02111B;
+  --d: #EA8C55;
   font-family: monospace;
   font-size: 16px;
 }
@@ -49,9 +49,9 @@ a {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --b: #282828;
-    --f: #fbf1c7;
-    --d: #fe8019;
+    --b: #02111B;
+    --f: #F1FAEE;
+    --d: #EA8C55;
   }
 }
 
