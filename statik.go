@@ -284,7 +284,7 @@ func getCommitDateTime(path string, info fs.FileInfo, name string) time.Time {
 			continue
 		}
 
-		cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C %s log --diff-filter=AM --follow --format=%%aI -1 -- %s`, path, n))
+		cmd := exec.Command("sh", "-c", fmt.Sprintf(`git -C "%s" log --diff-filter=AM --follow --format=%%aI -1 -- "%s"`, path, n))
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 		cmd.Stdout = &stdout
